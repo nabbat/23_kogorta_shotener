@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/nabbat/23_kogorta_shotener/cmd/config"
-	"github.com/nabbat/23_kogorta_shotener/internal/shotener_maker"
+	"github.com/nabbat/23_kogorta_shotener/internal/shotenermaker"
 	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
 	"io"
 	"log"
@@ -59,7 +59,7 @@ func (sh *ShortenURLHandler) HandleShortenURL(storage *urlstorage.URLStorage, c 
 		}
 
 		// Генерируем уникальный идентификатор сокращённого URL
-		shortURL := shotener_maker.GenerateID(urlBytes)
+		shortURL := shotenermaker.GenerateID(urlBytes)
 
 		// Добавляем соответствие в словарь
 		storage.AddURL(shortURL, string(urlBytes))

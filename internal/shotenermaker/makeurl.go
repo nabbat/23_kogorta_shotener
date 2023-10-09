@@ -1,4 +1,4 @@
-package shotener_maker
+package shotenermaker
 
 import "encoding/base64"
 
