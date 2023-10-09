@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/nabbat/url-shortener-server.git/cmd/config"
+	"github.com/nabbat/23_kogorta_shotener/cmd/config"
 	"io"
 	"log"
 	"net/http"

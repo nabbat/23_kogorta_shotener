@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/nabbat/url-shortener-server.git/cmd/config"
+	"github.com/nabbat/23_kogorta_shotener/cmd/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
