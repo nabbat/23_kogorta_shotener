@@ -3,9 +3,9 @@ package handlers
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/nabbat/url-shortener-server.git/cmd/config"
-	"github.com/nabbat/url-shortener-server.git/internal/shotener_maker"
-	urlstorage "github.com/nabbat/url-shortener-server.git/internal/storage"
+	"github.com/nabbat/23_kogorta_shotener/cmd/config"
+	"github.com/nabbat/23_kogorta_shotener/internal/shotener_maker"
+	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
 	"io"
 	"log"
 	"net/http"

@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/nabbat/url-shortener-server.git/internal/envirements"
-	"github.com/nabbat/url-shortener-server.git/internal/flags"
+	"github.com/nabbat/23_kogorta_shotener/internal/envirements"
+	"github.com/nabbat/23_kogorta_shotener/internal/flags"
 )
 
 // Config структура для хранения настроек
