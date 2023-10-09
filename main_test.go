@@ -53,17 +53,6 @@ func Test_shortenURLHandler(t *testing.T) {
 				contentType: "text/plain",
 			},
 		},
-		/*
-			{name: "negative POST shortenURLHandler",
-				bodyURL:             "https://practicum.yandex.ru/",
-				responseContentType: "application/json",
-				targetURL:           "/",
-				want: want{
-					code:        201,
-					response:    "http://localhost:8080/aHR0cH",
-					contentType: "text/plain; charset=utf-8",
-				},
-			},*/
 	}
 
 	for _, test := range tests {
@@ -73,10 +62,9 @@ func Test_shortenURLHandler(t *testing.T) {
 			request.Header.Add("Content-Type", test.responseContentType)
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
-			cfg := &config.Config{}
-			// Parse command line flags and populate the Config instance
-			config.ParseFlags(cfg)
-			shortenURLHandler(w, request, cfg)
+			c := config.SetEnv()
+
+			shortenURLHandler(w, request, c)
 			res := w.Result()
 			// проверяем код ответа
 			assert.Equal(t, res.StatusCode, test.want.code)
