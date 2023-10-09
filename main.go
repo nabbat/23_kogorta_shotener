@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/nabbat/url-shortener-server.git/cmd/config"
 	"io"
 	"log"
 	"net/http"
@@ -36,21 +37,14 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func shortenURLHandler(w http.ResponseWriter, r *http.Request) {
+func shortenURLHandler(w http.ResponseWriter, r *http.Request, cfg *config.Config) {
 	// Читаем тело запроса (URL)
 	urlBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Ошибка чтения запроса", http.StatusBadRequest)
 		return
 	}
-	/*
-		contentType := r.Header.Get("Content-Type")
 
-		if contentType != "text/plain" || contentType != "text/plain; charset=utf-8" {
-			http.Error(w, "invalid request type", http.StatusBadRequest)
-			return
-		}
-	*/
 	// Преобразуем в строку
 	url := string(urlBytes)
 
@@ -61,7 +55,7 @@ func shortenURLHandler(w http.ResponseWriter, r *http.Request) {
 	urlMap[id] = url
 
 	// Отправляем ответ с сокращённым URL
-	shortenedURL := fmt.Sprintf("http://localhost:8080/%s", id)
+	shortenedURL := fmt.Sprintf("%s/%s", cfg.ResultURL, id)
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
 	if _, err := io.WriteString(w, shortenedURL); err != nil {
@@ -80,11 +74,20 @@ func generateID(fullURL string) string {
 }
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/{idShortenURL}", redirectHandler).Methods("GET")
-	r.HandleFunc("/", shortenURLHandler).Methods("POST")
+	// Create a Config instance
+	cfg := &config.Config{}
 
-	err := http.ListenAndServe(":8080", r)
+	// Parse command line flags and populate the Config instance
+	config.ParseFlags(cfg)
+
+	// Run server
+	r := mux.NewRouter()
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		shortenURLHandler(w, r, cfg)
+	}).Methods("POST")
+	r.HandleFunc("/{idShortenURL}", redirectHandler).Methods("GET")
+	fmt.Println("Running server on", cfg.RunAddr)
+	err := http.ListenAndServe(cfg.RunAddr, r)
 	if err != nil {
 		panic(err)
 	}
