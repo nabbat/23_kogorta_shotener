@@ -22,7 +22,7 @@ func SetEnv() *Config {
 		c.RunAddr = fl.RunAddr
 	}
 
-	if en.EnvResultURL != "" {
+	if en.EnvResultURL != "" && en.EnvRunAddr != "http://" {
 		c.ResultURL = en.EnvResultURL
 	} else {
 		c.ResultURL = fl.ResultURL
