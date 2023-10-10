@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/nabbat/23_kogorta_shotener/internal/envirements"
 	"github.com/nabbat/23_kogorta_shotener/internal/flags"
 )
@@ -27,6 +28,6 @@ func SetEnv() *Config {
 	} else {
 		c.ResultURL = fl.ResultURL
 	}
-
+	fmt.Println(c)
 	return c
 }

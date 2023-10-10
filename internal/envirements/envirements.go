@@ -16,7 +16,7 @@ func ParseEnv() *EnvConfig {
 	env.EnvRunAddr = os.Getenv("RUN_ADDR")
 	env.EnvResultURL = os.Getenv("SERVER_ADDRESS")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
-	if !strings.HasPrefix(env.EnvResultURL, "http://") {
+	if !strings.HasPrefix(env.EnvResultURL, "http://") && env.EnvResultURL != "" {
 		env.EnvResultURL = "http://" + env.EnvResultURL
 	}
 	return env
