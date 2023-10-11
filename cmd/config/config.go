@@ -6,25 +6,19 @@ import (
 	"github.com/nabbat/23_kogorta_shotener/internal/flags"
 )
 
-// Config структура для хранения настроек
-type Config struct {
-	RunAddr   string
-	ResultURL string
-}
-
-func SetEnv() *Config {
+func SetEnv() *envirements.EnvConfig {
 	fl := flags.ParseFlags()
 	en := envirements.ParseEnv()
-	c := &Config{}
+	c := &envirements.EnvConfig{}
 
-	if en.EnvRunAddr != "" {
-		c.RunAddr = en.EnvRunAddr
+	if en.RunAddr != "" {
+		c.RunAddr = en.RunAddr
 	} else {
 		c.RunAddr = fl.RunAddr
 	}
 
-	if en.EnvResultURL != "" && en.EnvRunAddr != "http://" {
-		c.ResultURL = en.EnvResultURL
+	if en.ResultURL != "" && en.RunAddr != "http://" {
+		c.ResultURL = en.ResultURL
 	} else {
 		c.ResultURL = fl.ResultURL
 	}

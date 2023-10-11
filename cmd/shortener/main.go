@@ -1,10 +1,13 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/nabbat/23_kogorta_shotener/cmd/config"
+	"github.com/nabbat/23_kogorta_shotener/internal/envirements"
+	"github.com/nabbat/23_kogorta_shotener/internal/handlers"
+	"github.com/nabbat/23_kogorta_shotener/internal/shotenermaker"
+	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
 	"io"
 	"log"
 	"net/http"
@@ -37,7 +40,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func shortenURLHandler(w http.ResponseWriter, r *http.Request, c *config.Config) {
+func shortenURLHandler(w http.ResponseWriter, r *http.Request, c *envirements.EnvConfig) {
 	// Читаем тело запроса (URL)
 	urlBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -49,7 +52,7 @@ func shortenURLHandler(w http.ResponseWriter, r *http.Request, c *config.Config)
 	url := string(urlBytes)
 
 	// Генерируем уникальный идентификатор сокращённого URL
-	id := generateID(url)
+	id := shotenermaker.GenerateID([]byte(url))
 
 	// Добавляем соответствие в словарь
 	urlMap[id] = url
@@ -63,25 +66,22 @@ func shortenURLHandler(w http.ResponseWriter, r *http.Request, c *config.Config)
 	}
 }
 
-// Простая функция для генерации уникального идентификатора
-func generateID(fullURL string) string {
-	encodedStr := base64.URLEncoding.EncodeToString([]byte(fullURL))
-	// Возвращаем первые 6 символов закодированной строки
-	if len(encodedStr) > 6 {
-		return encodedStr[:6]
-	}
-	return encodedStr
-}
-
 func main() {
+	// Получаем переменные если они есть
 	c := config.SetEnv()
 
-	// Run server
+	// Создаем хранилище
+	storage := urlstorage.NewURLStorage()
+	// Создаем хэндлеры
+	redirectHandler := &handlers.RedirectHandler{}
+	shortenURLHandler := &handlers.ShortenURLHandler{}
+
 	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		shortenURLHandler(w, r, c)
-	}).Methods("POST")
-	r.HandleFunc("/{idShortenURL}", redirectHandler).Methods("GET")
+	r.Use(handlers.PanicHandler) // Добавляем PanicHandler middleware
+
+	r.HandleFunc("/", shortenURLHandler.HandleShortenURL(storage, c)).Methods("POST")
+	r.HandleFunc("/{idShortenURL}", redirectHandler.HandleRedirect(storage)).Methods("GET")
+
 	fmt.Println("RunAddr: ResultURL: ", c.RunAddr, c.ResultURL)
 	fmt.Println("Running server on", c.RunAddr)
 	err := http.ListenAndServe(c.RunAddr, r)

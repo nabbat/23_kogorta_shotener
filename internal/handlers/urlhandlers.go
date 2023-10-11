@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/nabbat/23_kogorta_shotener/cmd/config"
+	"github.com/nabbat/23_kogorta_shotener/internal/envirements"
 	"github.com/nabbat/23_kogorta_shotener/internal/shotenermaker"
 	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
 	"io"
@@ -16,7 +16,7 @@ type RedirectHandlerInterface interface {
 }
 
 type ShortenURLHandlerInterface interface {
-	HandleShortenURL(storage *urlstorage.URLStorage, c *config.Config) http.HandlerFunc
+	HandleShortenURL(storage *urlstorage.URLStorage, c *envirements.EnvConfig) http.HandlerFunc
 }
 
 type RedirectHandler struct{}
@@ -48,7 +48,7 @@ func (rh *RedirectHandler) HandleRedirect(storage *urlstorage.URLStorage) http.H
 
 type ShortenURLHandler struct{}
 
-func (sh *ShortenURLHandler) HandleShortenURL(storage *urlstorage.URLStorage, c *config.Config) http.HandlerFunc {
+func (sh *ShortenURLHandler) HandleShortenURL(storage *urlstorage.URLStorage, c *envirements.EnvConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Читаем тело запроса (URL)
 		defer r.Body.Close()
