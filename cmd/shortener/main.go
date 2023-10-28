@@ -30,6 +30,7 @@ func main() {
 	r.Use(handlers.ResponseLoggingMiddleware(log))
 	r.Use(handlers.PanicHandler) // Добавляем PanicHandler middleware
 
+	r.HandleFunc("/api/shorten", shortenURLHandler.HandleShortenURLJSON(storage, c, log)).Methods("POST")
 	r.HandleFunc("/", shortenURLHandler.HandleShortenURL(storage, c, log)).Methods("POST")
 	r.HandleFunc("/{idShortenURL}", redirectHandler.HandleRedirect(storage, log)).Methods("GET")
 

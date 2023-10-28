@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/nabbat/23_kogorta_shotener/internal/envirements"
@@ -133,5 +135,45 @@ func RequestLoggingMiddleware(log liblog.Logger) mux.MiddlewareFunc {
 
 			log.Info("Request: ", r.Method, " ", r.RequestURI, " | Time: ", duration)
 		})
+	}
+}
+
+func (sh *ShortenURLHandler) HandleShortenURLJSON(storage *urlstorage.URLStorage, c *envirements.EnvConfig, log liblog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Читаем JSON из тела запроса
+		type URLJSONRequest struct {
+			URL string `json:"url"`
+		}
+		var urlJSONRequest URLJSONRequest
+		var buf bytes.Buffer
+
+		// читаем тело запроса
+		_, err := buf.ReadFrom(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// десериализуем JSON
+		if err = json.Unmarshal(buf.Bytes(), &urlJSONRequest); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Генерируем уникальный идентификатор сокращенного URL
+		shortURL := shotenermaker.GenerateID([]byte(urlJSONRequest.URL))
+
+		// Добавляем соответствие в словарь
+		storage.AddURL(shortURL, urlJSONRequest.URL)
+
+		// Формируем JSON-ответ с сокращенным URL
+		response := map[string]string{"result": c.ResultURL + "/" + shortURL}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Error("Ошибка записи JSON-ответа:", err)
+			http.Error(w, "Ошибка записи JSON-ответа", http.StatusInternalServerError)
+		}
 	}
 }
