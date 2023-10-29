@@ -5,6 +5,7 @@ import (
 	"github.com/nabbat/23_kogorta_shotener/cmd/config"
 	"github.com/nabbat/23_kogorta_shotener/internal/handlers"
 	"github.com/nabbat/23_kogorta_shotener/internal/liblog"
+	"github.com/nabbat/23_kogorta_shotener/internal/middlewares"
 	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
 	"net/http"
 )
@@ -23,12 +24,12 @@ func main() {
 	shortenURLHandler := &handlers.ShortenURLHandler{}
 
 	r := mux.NewRouter()
-
+	r.Use(middlewares.GzipMiddleware(log))
 	// Регистрируем middleware для логирования запросов
-	r.Use(handlers.RequestLoggingMiddleware(log))
+	r.Use(middlewares.RequestLoggingMiddleware(log))
 	// Регистрируем middleware для логирования ответов
-	r.Use(handlers.ResponseLoggingMiddleware(log))
-	r.Use(handlers.PanicHandler) // Добавляем PanicHandler middleware
+	r.Use(middlewares.ResponseLoggingMiddleware(log))
+	r.Use(middlewares.PanicHandler) // Добавляем PanicHandler middleware
 
 	r.HandleFunc("/api/shorten", shortenURLHandler.HandleShortenURLJSON(storage, c, log)).Methods("POST")
 	r.HandleFunc("/", shortenURLHandler.HandleShortenURL(storage, c, log)).Methods("POST")

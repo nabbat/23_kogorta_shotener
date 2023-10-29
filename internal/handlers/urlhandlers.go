@@ -11,7 +11,6 @@ import (
 	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
 	"io"
 	"net/http"
-	"time"
 )
 
 type RedirectHandler struct{}
@@ -68,73 +67,6 @@ func (sh *ShortenURLHandler) HandleShortenURL(storage *urlstorage.URLStorage, c 
 		if _, err := io.WriteString(w, shortenedURL); err != nil {
 			log.Info("Ошибка записи ответа", err)
 		}
-	}
-}
-
-func PanicHandler(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			}
-		}()
-		next.ServeHTTP(w, r)
-	})
-}
-
-type ResponseLogger struct {
-	ResponseWriter http.ResponseWriter
-	StatusCode     int
-}
-
-type responseWriterWrapper struct {
-	http.ResponseWriter
-	status int
-	size   int
-}
-
-func (rw *responseWriterWrapper) Status() int {
-	return rw.status
-}
-
-func (rw *responseWriterWrapper) Size() int {
-	return rw.size
-}
-
-func (rw *responseWriterWrapper) Write(b []byte) (int, error) {
-	n, err := rw.ResponseWriter.Write(b)
-	rw.size += n
-	return n, err
-}
-
-func (rw *responseWriterWrapper) WriteHeader(status int) {
-	rw.ResponseWriter.WriteHeader(status)
-	rw.status = status
-}
-
-func ResponseLoggingMiddleware(log liblog.Logger) mux.MiddlewareFunc {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			rw := &responseWriterWrapper{ResponseWriter: w}
-			next.ServeHTTP(rw, r)
-
-			status := rw.Status()
-			size := rw.Size()
-
-			log.Info("Status: ", status, " | Size: ", size, " bytes")
-		})
-	}
-}
-
-func RequestLoggingMiddleware(log liblog.Logger) mux.MiddlewareFunc {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
-			next.ServeHTTP(w, r)
-			duration := time.Since(start)
-
-			log.Info("Request: ", r.Method, " ", r.RequestURI, " | Time: ", duration)
-		})
 	}
 }
 
