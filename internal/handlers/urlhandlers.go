@@ -38,6 +38,7 @@ func (rh *RedirectHandler) HandleRedirect(storage *urlstorage.URLStorage, log li
 		// Устанавливаем заголовок Location и возвращаем ответ с кодом 307
 		w.Header().Set("Location", originalURL)
 		w.WriteHeader(http.StatusTemporaryRedirect)
+		log.Info("Location set:" + originalURL)
 
 	}
 }
