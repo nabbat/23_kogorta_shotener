@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+	//TODO make test MF!!! 🤬
+
 	// Инициализируем логер
 	log := liblog.NewLogger()
 
