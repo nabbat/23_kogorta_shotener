@@ -8,8 +8,8 @@ func NewURLStorage() *URLStorage {
 	storage := &URLStorage{
 		urlMap: make(map[string]string),
 	}
-	// Adding Test Compliance
-	storage.AddURL("aHR0cH", "https://practicum.yandex.ru/")
+	// Adding Test Compliance TEST
+	//storage.AddURL("aHR0cH", "https://practicum.yandex.ru/")
 	return storage
 }
 
