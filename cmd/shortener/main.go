@@ -22,7 +22,8 @@ func main() {
 
 	// Создаем хранилище
 	myStorage := urlstorage.NewURLStorage()
-	myStorageFile, _ := filestorage.NewFileStorage("short-url-db.json", log)
+
+	myStorageFile, _ := filestorage.NewFileStorage("short-url-db.json", log, &filestorage.File{})
 	defer myStorageFile.Close()
 
 	// Создаем хэндлеры

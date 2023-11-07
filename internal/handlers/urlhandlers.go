@@ -28,7 +28,10 @@ func (rh *RedirectHandler) HandleRedirect(storage urlstorage.Storage, log liblog
 		shortURL := vars["idShortenURL"]
 
 		// Получаем оригинальный URL
-		originalURL := storage.GetOriginalURL(shortURL)
+		originalURL, err := storage.GetOriginalURL(shortURL)
+		if err != nil {
+			log.Info(err)
+		}
 
 		if originalURL == "" {
 			http.Error(w, "Ссылка не найдена", http.StatusBadRequest)
