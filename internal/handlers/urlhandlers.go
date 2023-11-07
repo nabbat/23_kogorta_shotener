@@ -15,7 +15,7 @@ import (
 
 type RedirectHandler struct{}
 
-func (rh *RedirectHandler) HandleRedirect(storage *urlstorage.URLStorage, log liblog.Logger) http.HandlerFunc {
+func (rh *RedirectHandler) HandleRedirect(storage urlstorage.Storage, log liblog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "invalid request type", http.StatusBadRequest)
@@ -45,7 +45,7 @@ func (rh *RedirectHandler) HandleRedirect(storage *urlstorage.URLStorage, log li
 
 type ShortenURLHandler struct{}
 
-func (sh *ShortenURLHandler) HandleShortenURL(storage *urlstorage.URLStorage, c *envirements.EnvConfig, log liblog.Logger) http.HandlerFunc {
+func (sh *ShortenURLHandler) HandleShortenURL(storage urlstorage.Storage, c *envirements.EnvConfig, log liblog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Читаем тело запроса (URL)
 		defer r.Body.Close()
@@ -71,7 +71,7 @@ func (sh *ShortenURLHandler) HandleShortenURL(storage *urlstorage.URLStorage, c 
 	}
 }
 
-func (sh *ShortenURLHandler) HandleShortenURLJSON(storage *urlstorage.URLStorage, c *envirements.EnvConfig, log liblog.Logger) http.HandlerFunc {
+func (sh *ShortenURLHandler) HandleShortenURLJSON(storage urlstorage.Storage, c *envirements.EnvConfig, log liblog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Читаем JSON из тела запроса
 		type URLJSONRequest struct {

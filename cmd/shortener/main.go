@@ -6,7 +6,8 @@ import (
 	"github.com/nabbat/23_kogorta_shotener/internal/handlers"
 	"github.com/nabbat/23_kogorta_shotener/internal/liblog"
 	"github.com/nabbat/23_kogorta_shotener/internal/middlewares"
-	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
+	"github.com/nabbat/23_kogorta_shotener/internal/storage/filestorage"
+	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage/internalstorage"
 	"net/http"
 )
 
@@ -20,7 +21,10 @@ func main() {
 	c := config.SetEnv()
 
 	// Создаем хранилище
-	storage := urlstorage.NewURLStorage()
+	myStorage := urlstorage.NewURLStorage()
+	myStorageFile, _ := filestorage.NewFileStorage("short-url-db.json", log)
+	defer myStorageFile.Close()
+
 	// Создаем хэндлеры
 	redirectHandler := &handlers.RedirectHandler{}
 	shortenURLHandler := &handlers.ShortenURLHandler{}
@@ -33,9 +37,9 @@ func main() {
 	r.Use(middlewares.ResponseLoggingMiddleware(log))
 	r.Use(middlewares.PanicHandler) // Добавляем PanicHandler middleware
 
-	r.HandleFunc("/api/shorten", shortenURLHandler.HandleShortenURLJSON(storage, c, log)).Methods("POST")
-	r.HandleFunc("/", shortenURLHandler.HandleShortenURL(storage, c, log)).Methods("POST")
-	r.HandleFunc("/{idShortenURL}", redirectHandler.HandleRedirect(storage, log)).Methods("GET")
+	r.HandleFunc("/api/shorten", shortenURLHandler.HandleShortenURLJSON(myStorage, c, log)).Methods("POST")
+	r.HandleFunc("/", shortenURLHandler.HandleShortenURL(myStorage, c, log)).Methods("POST")
+	r.HandleFunc("/{idShortenURL}", redirectHandler.HandleRedirect(myStorage, log)).Methods("GET")
 
 	log.Info("RunAddr: ", c.RunAddr, " | ", "ResultURL: ", c.ResultURL)
 	log.Info("Running server on ", c.RunAddr)

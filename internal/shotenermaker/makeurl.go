@@ -9,7 +9,7 @@ import (
 func GenerateID(fullURL []byte) string {
 	h := sha1.New()
 	h.Write(fullURL)
-	hashBytes := h.Sum(nil)
+	hashBytes := h.Sum(nil) // TODO Добавить соль
 	encodedStr := hex.EncodeToString(hashBytes)
 
 	// Возвращаем первые 6 символов закодированной строки

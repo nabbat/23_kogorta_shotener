@@ -136,7 +136,7 @@ func RequestLoggingMiddleware(log liblog.Logger) mux.MiddlewareFunc {
 	}
 }
 
-// gzipMiddleware Делает сжатие и распаковку если это возможно
+// GzipMiddleware Делает сжатие и распаковку если это возможно
 func GzipMiddleware(log liblog.Logger) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
