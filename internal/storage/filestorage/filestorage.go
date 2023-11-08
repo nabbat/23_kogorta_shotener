@@ -14,24 +14,24 @@ type URLDataJSON struct {
 	OriginalURL string `json:"original_url"`
 }
 
-type File struct {
+type NewFile struct {
 	os.File
 	i int
 }
 
 // NewFileStorage Создает или подключает существующий файл
-func NewFileStorage(filename string, log liblog.Logger, storage *File) (*os.File, error) {
+func NewFileStorage(filename string, log liblog.Logger, storage *NewFile) (*NewFile, error) {
 	// TRYING TO OPEN A FILE
 	file, err := os.OpenFile(filename, os.O_RDWR, 0666)
 	// IF THE FILE COULD NOT BE OPENED CREATE IT
 	if err != nil {
-		file, err := os.OpenFile(filename, os.O_CREATE, 0666)
+		_, err := os.OpenFile(filename, os.O_CREATE, 0666)
 		if err != nil {
 			log.Info("Failed to open or create the file: %v", err)
 			return nil, err
 		}
 		storage.i = 0
-		return file, nil
+		return storage, nil
 	}
 	// Прочитать последнее значение UUID
 	lastUUID, err := readLastUUID(file)
@@ -42,7 +42,7 @@ func NewFileStorage(filename string, log liblog.Logger, storage *File) (*os.File
 	}
 
 	storage.i = lastUUID
-	return file, nil
+	return storage, nil
 }
 
 // readLastUUID FUNCTION TO READ THE LATEST UUID FROM A FILE
@@ -68,7 +68,7 @@ func readLastUUID(file *os.File) (int, error) {
 }
 
 // AddURL adds a pair of shortened URL -> original URL
-func (storage *File) AddURL(shortURL, originalURL string) error {
+func (storage *NewFile) AddURL(shortURL, originalURL string) error {
 	storage.i++
 	u := URLDataJSON{
 		UUID:        storage.i,
@@ -93,7 +93,7 @@ func (storage *File) AddURL(shortURL, originalURL string) error {
 }
 
 // GetOriginalURL returns the original URL from the shortened URL
-func (storage *File) GetOriginalURL(shortURL string) (string, error) {
+func (storage *NewFile) GetOriginalURL(shortURL string) (string, error) {
 	s := bufio.NewScanner(&storage.File)
 
 	for s.Scan() {

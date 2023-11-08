@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/nabbat/23_kogorta_shotener/internal/envirements"
+	"github.com/nabbat/23_kogorta_shotener/cmd/config"
 	"github.com/nabbat/23_kogorta_shotener/internal/liblog"
 	"github.com/nabbat/23_kogorta_shotener/internal/shotenermaker"
 	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
@@ -48,7 +48,7 @@ func (rh *RedirectHandler) HandleRedirect(storage urlstorage.Storage, log liblog
 
 type ShortenURLHandler struct{}
 
-func (sh *ShortenURLHandler) HandleShortenURL(storage urlstorage.Storage, c *envirements.EnvConfig, log liblog.Logger) http.HandlerFunc {
+func (sh *ShortenURLHandler) HandleShortenURL(storage urlstorage.Storage, c *config.Config, log liblog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Читаем тело запроса (URL)
 		defer r.Body.Close()
@@ -74,7 +74,7 @@ func (sh *ShortenURLHandler) HandleShortenURL(storage urlstorage.Storage, c *env
 	}
 }
 
-func (sh *ShortenURLHandler) HandleShortenURLJSON(storage urlstorage.Storage, c *envirements.EnvConfig, log liblog.Logger) http.HandlerFunc {
+func (sh *ShortenURLHandler) HandleShortenURLJSON(storage urlstorage.Storage, c *config.Config, log liblog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Читаем JSON из тела запроса
 		type URLJSONRequest struct {
