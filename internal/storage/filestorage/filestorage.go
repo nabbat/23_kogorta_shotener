@@ -8,6 +8,10 @@ import (
 	"os"
 )
 
+type Closer interface {
+	CloseFile()
+}
+
 type URLDataJSON struct {
 	UUID        int    `json:"uuid"`
 	ShortURL    string `json:"short_url"`
@@ -21,27 +25,24 @@ type NewFile struct {
 
 // NewFileStorage Создает или подключает существующий файл
 func NewFileStorage(filename string, log liblog.Logger, storage *NewFile) (*NewFile, error) {
-	// TRYING TO OPEN A FILE
-	file, err := os.OpenFile(filename, os.O_RDWR, 0666)
-	// IF THE FILE COULD NOT BE OPENED CREATE IT
+	// TRYING TO OPEN  OR CREATE A FILE
+	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0777)
 	if err != nil {
-		_, err := os.OpenFile(filename, os.O_CREATE, 0666)
-		if err != nil {
-			log.Info("Failed to open or create the file: %v", err)
-			return nil, err
-		}
-		storage.i = 0
-		return storage, nil
+		log.Info("Failed to open or create the file: %v", err)
+		return nil, err
 	}
+
 	// Прочитать последнее значение UUID
 	lastUUID, err := readLastUUID(file)
 	if err != nil {
 		log.Info("Failed to read the last UUID: %v", err)
 		storage.i = 0
-		return nil, err
+		storage.File = *file
+		return storage, err
 	}
 
 	storage.i = lastUUID
+	storage.File = *file
 	return storage, nil
 }
 
@@ -81,14 +82,13 @@ func (storage *NewFile) AddURL(shortURL, originalURL string) error {
 		return err
 	}
 
-	// Добавляем разделитель (например, перевод строки) между записями
 	d = append(d, '\n')
 
 	_, err = storage.File.Write(d)
 	if err != nil {
 		return err
 	}
-
+	storage.File.Sync()
 	return nil
 }
 
@@ -109,4 +109,9 @@ func (storage *NewFile) GetOriginalURL(shortURL string) (string, error) {
 	}
 
 	return "", errors.New("Short url not found")
+}
+
+// Close закрывает файл
+func (storage *NewFile) Close() {
+	storage.File.Close()
 }

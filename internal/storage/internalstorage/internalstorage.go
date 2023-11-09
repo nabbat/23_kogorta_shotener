@@ -21,3 +21,8 @@ func (storage *InternalURLStorage) AddURL(shortURL, originalURL string) error {
 func (storage *InternalURLStorage) GetOriginalURL(shortURL string) (string, error) {
 	return storage.urlMap[shortURL], nil
 }
+
+// Close returns the original URL from the shortened URL
+func (storage *InternalURLStorage) Close() {
+	// May be late
+}

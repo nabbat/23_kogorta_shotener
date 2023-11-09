@@ -36,7 +36,7 @@ func SetEnv(log liblog.Logger) (storage.Storage, *Config, error) {
 		c.FileName = fl.FileName
 		log.Info(c)
 		st, _ := filestorage.NewFileStorage(c.FileName, log, &filestorage.NewFile{})
-		defer st.Close()
+
 		return st, c, nil
 	}
 

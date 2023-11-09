@@ -17,6 +17,7 @@ func main() {
 
 	// Получаем переменные если они есть
 	storage, c, err := config.SetEnv(log)
+	defer storage.Close()
 
 	// Создаем хэндлеры
 	redirectHandler := &handlers.RedirectHandler{}
