@@ -76,39 +76,44 @@ func (storage *NewFile) AddURL(shortURL, originalURL string) error {
 		ShortURL:    shortURL,
 		OriginalURL: originalURL,
 	}
+	findURL, err := storage.GetOriginalURL(shortURL)
+	if findURL == "" {
+		d, err := json.Marshal(u)
+		if err != nil {
+			return err
+		}
 
-	d, err := json.Marshal(u)
-	if err != nil {
-		return err
+		d = append(d, '\n')
+		_, err = storage.File.Write(d)
+		if err != nil {
+			return err
+		}
+		storage.File.Sync()
+		return nil
 	}
-
-	d = append(d, '\n')
-
-	_, err = storage.File.Write(d)
-	if err != nil {
-		return err
-	}
-	storage.File.Sync()
-	return nil
+	return err
 }
 
 // GetOriginalURL returns the original URL from the shortened URL
 func (storage *NewFile) GetOriginalURL(shortURL string) (string, error) {
-	s := bufio.NewScanner(&storage.File)
+	filename := storage.Name()
+	f, _ := os.OpenFile(filename, os.O_RDONLY, 0777)
+	defer f.Close()
+	s := bufio.NewScanner(f)
 
 	for s.Scan() {
-		buffer := s.Bytes()
+		buff := s.Bytes()
 		u := URLDataJSON{}
-		err := json.Unmarshal(buffer, &u)
+		err := json.Unmarshal(buff, &u)
 		if err != nil {
+			continue
 		}
 
 		if u.ShortURL == shortURL {
 			return u.OriginalURL, nil
 		}
 	}
-
-	return "", errors.New("Short url not found")
+	return "", errors.New("short url not found")
 }
 
 // Close закрывает файл
