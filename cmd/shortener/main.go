@@ -17,6 +17,10 @@ func main() {
 
 	// Получаем переменные если они есть
 	storage, c, err := config.SetEnv(log)
+	if err != nil {
+		log.Info(err)
+	}
+
 	defer storage.Close()
 
 	// Создаем хэндлеры
