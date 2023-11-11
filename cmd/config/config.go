@@ -40,7 +40,7 @@ func SetEnv(log liblog.Logger) (storage.Storage, *Config, error) {
 	}
 
 	if fl.FileName != "" {
-		c.FileName = fl.FileName
+		c.FileName = "/tmp/" + fl.FileName
 		st, _ := filestorage.NewFileStorage(c.FileName, log, &filestorage.NewFile{})
 
 		return st, c, nil
