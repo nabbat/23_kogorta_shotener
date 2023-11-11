@@ -32,9 +32,15 @@ func SetEnv(log liblog.Logger) (storage.Storage, *Config, error) {
 		c.ResultURL = fl.ResultURL
 	}
 
+	if en.FileName != "" {
+		c.FileName = en.FileName
+		st, _ := filestorage.NewFileStorage(c.FileName, log, &filestorage.NewFile{})
+
+		return st, c, nil
+	}
+
 	if fl.FileName != "" {
 		c.FileName = fl.FileName
-		log.Info(c)
 		st, _ := filestorage.NewFileStorage(c.FileName, log, &filestorage.NewFile{})
 
 		return st, c, nil
