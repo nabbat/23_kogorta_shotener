@@ -1,15 +1,24 @@
 package config
 
 import (
-	"fmt"
 	"github.com/nabbat/23_kogorta_shotener/internal/envirements"
 	"github.com/nabbat/23_kogorta_shotener/internal/flags"
+	"github.com/nabbat/23_kogorta_shotener/internal/liblog"
+	"github.com/nabbat/23_kogorta_shotener/internal/storage"
+	"github.com/nabbat/23_kogorta_shotener/internal/storage/filestorage"
+	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage/internalstorage"
 )
 
-func SetEnv() *envirements.EnvConfig {
+type Config struct {
+	RunAddr   string
+	ResultURL string
+	FileName  string
+}
+
+func SetEnv(log liblog.Logger) (storage.Storage, *Config, error) {
 	fl := flags.ParseFlags()
 	en := envirements.ParseEnv()
-	c := &envirements.EnvConfig{}
+	c := &Config{}
 
 	if en.RunAddr != "" {
 		c.RunAddr = en.RunAddr
@@ -22,6 +31,21 @@ func SetEnv() *envirements.EnvConfig {
 	} else {
 		c.ResultURL = fl.ResultURL
 	}
-	fmt.Println(c)
-	return c
+
+	if en.FileName != "" {
+		c.FileName = en.FileName
+		st, _ := filestorage.NewFileStorage(c.FileName, log, &filestorage.NewFile{})
+
+		return st, c, nil
+	}
+
+	if fl.FileName != "" {
+		c.FileName = "/tmp/" + fl.FileName
+		st, _ := filestorage.NewFileStorage(c.FileName, log, &filestorage.NewFile{})
+
+		return st, c, nil
+	}
+
+	st := urlstorage.NewURLStorage()
+	return st, c, nil
 }

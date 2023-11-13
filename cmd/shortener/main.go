@@ -1,33 +1,48 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/nabbat/23_kogorta_shotener/cmd/config"
 	"github.com/nabbat/23_kogorta_shotener/internal/handlers"
-	urlstorage "github.com/nabbat/23_kogorta_shotener/internal/storage"
+	"github.com/nabbat/23_kogorta_shotener/internal/liblog"
+	"github.com/nabbat/23_kogorta_shotener/internal/middlewares"
 	"net/http"
 )
 
 func main() {
-	// Получаем переменные если они есть
-	c := config.SetEnv()
+	//TODO make test MF!!! 🤬
 
-	// Создаем хранилище
-	storage := urlstorage.NewURLStorage()
+	// Инициализируем логер
+	log := liblog.NewLogger()
+
+	// Получаем переменные если они есть
+	storage, c, err := config.SetEnv(log)
+	if err != nil {
+		log.Info(err)
+	}
+
+	defer storage.Close()
+
 	// Создаем хэндлеры
 	redirectHandler := &handlers.RedirectHandler{}
 	shortenURLHandler := &handlers.ShortenURLHandler{}
 
 	r := mux.NewRouter()
-	r.Use(handlers.PanicHandler) // Добавляем PanicHandler middleware
+	r.Use(middlewares.GzipMiddleware(log))
+	// Регистрируем middleware для логирования запросов
+	r.Use(middlewares.RequestLoggingMiddleware(log))
+	// Регистрируем middleware для логирования ответов
+	r.Use(middlewares.ResponseLoggingMiddleware(log))
+	r.Use(middlewares.PanicHandler) // Добавляем PanicHandler middleware
 
-	r.HandleFunc("/", shortenURLHandler.HandleShortenURL(storage, c)).Methods("POST")
-	r.HandleFunc("/{idShortenURL}", redirectHandler.HandleRedirect(storage)).Methods("GET")
+	r.HandleFunc("/api/shorten", shortenURLHandler.HandleShortenURLJSON(storage, c, log)).Methods("POST")
+	r.HandleFunc("/", shortenURLHandler.HandleShortenURL(storage, c, log)).Methods("POST")
+	r.HandleFunc("/{idShortenURL}", redirectHandler.HandleRedirect(storage, log)).Methods("GET")
 
-	fmt.Println("RunAddr: ResultURL: ", c.RunAddr, c.ResultURL)
-	fmt.Println("Running server on", c.RunAddr)
-	err := http.ListenAndServe(c.RunAddr, r)
+	log.Info("RunAddr: ", c.RunAddr, " | ", "ResultURL: ", c.ResultURL)
+	log.Info("Running server on ", c.RunAddr)
+
+	err = http.ListenAndServe(c.RunAddr, r)
 	if err != nil {
 		panic(err)
 	}
